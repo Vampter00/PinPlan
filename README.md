@@ -1,1 +1,8 @@
-# Pin Plan Phase 2\nAdds Metrics, Training, Wellness and Journal sections.
+# Pin Plan Phase 3
+
+Features:
+- Bloodwork module
+- Progress photo uploads
+- Analytics section
+- JSON data export scaffold
+- Storage utilities
