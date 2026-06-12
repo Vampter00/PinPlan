@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Activity, TrendingUp, Zap, Target, Calendar, Plus, Settings, Menu } from 'lucide-react'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts'
+import { Activity, TrendingUp, Zap, Target, Calendar, Plus, Flame, Heart, Dumbbell, Gauge, ArrowUp, Clock } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import { LocalStorage, Analytics } from '@/lib/storage'
 import { DailyMetrics, CyclePhase } from '@/lib/types'
@@ -17,7 +17,6 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Load data from localStorage
     const savedMetrics = LocalStorage.getMetrics()
     setMetrics(savedMetrics)
     setStats(Analytics.getStatistics(30))
@@ -35,186 +34,318 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+        <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
       </div>
     )
   }
 
   const last30Days = metrics.slice(-30)
-  const macroData = stats ? [
-    { name: 'Protein', value: stats.averageProtein, fill: '#10b981' },
-    { name: 'Carbs', value: stats.averageProtein * 2, fill: '#f59e0b' },
-    { name: 'Fats', value: stats.averageProtein * 0.8, fill: '#ef4444' },
-  ] : []
+  const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#fbbf24']
 
   return (
-    <main className="min-h-screen bg-dark">
+    <main className="min-h-screen bg-gradient-to-br from-dark via-dark-light to-dark">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 p-8 md:p-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        {/* HERO SECTION */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-accent/10 to-secondary/10 border border-primary/30 p-8 md:p-12 shadow-2xl shadow-primary/20 group hover:shadow-primary/40 transition-all duration-500">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5 group-hover:opacity-10 transition-opacity"></div>
+          
           <div className="relative z-10">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white">Welcome Back</h1>
-            <p className="text-lg text-slate-300 mb-6">
-              {currentCycle ? `Current Phase: ${currentCycle.name}` : 'No active cycle. Start a new phase to track your progress.'}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-primary/20 rounded-lg">
+                <Flame className="text-secondary" size={24} />
+              </div>
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Welcome Back, Athlete</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent leading-tight">
+              Ready to Crush It?
+            </h1>
+            
+            <p className="text-xl text-slate-300 mb-8 max-w-2xl">
+              {currentCycle ? (
+                <>
+                  Current Phase: <span className="font-bold text-secondary">{currentCycle.name}</span> • 
+                  Target: <span className="font-bold text-accent">{currentCycle.targetCalories} kcal/day</span>
+                </>
+              ) : 'No active cycle. Start a new training phase to supercharge your progress!'}
             </p>
+            
             <button
               onClick={() => setShowMetricsForm(true)}
-              className="btn-primary flex items-center gap-2"
+              className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-dark font-bold rounded-xl flex items-center gap-3 hover:scale-105 hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 text-lg"
             >
-              <Plus size={20} />
+              <Plus size={24} />
               Log Today's Metrics
             </button>
           </div>
-          <div className="absolute right-0 top-0 opacity-10">
-            <Activity size={300} />
-          </div>
+          
+          <div className="absolute -right-20 -top-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute -left-20 -bottom-20 w-60 h-60 bg-accent/10 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
 
-        {/* Stats Grid */}
+        {/* KEY STATS - PREMIUM CARDS */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              icon={<TrendingUp size={24} className="text-success" />}
+            <PremiumStatCard
+              icon={<Flame size={28} className="text-orange-500" />}
               label="Avg Calories"
               value={stats.averageCalories}
               unit="kcal"
-              trend="up"
+              trend={8.5}
+              color="from-orange-500/20 to-red-500/20"
             />
-            <StatCard
-              icon={<Zap size={24} className="text-warning" />}
+            <PremiumStatCard
+              icon={<Dumbbell size={28} className="text-green-500" />}
               label="Avg Protein"
               value={stats.averageProtein}
               unit="g"
-              trend="stable"
+              trend={5.2}
+              color="from-green-500/20 to-emerald-500/20"
             />
-            <StatCard
-              icon={<Target size={24} className="text-primary" />}
+            <PremiumStatCard
+              icon={<Activity size={28} className="text-cyan-500" />}
               label="Workouts"
               value={stats.totalWorkouts}
               unit="sessions"
-              trend="up"
+              trend={12.3}
+              color="from-cyan-500/20 to-blue-500/20"
             />
-            <StatCard
-              icon={<Calendar size={24} className="text-accent" />}
-              label="Current Streak"
+            <PremiumStatCard
+              icon={<Clock size={28} className="text-amber-500" />}
+              label="Streak"
               value={stats.currentStreak}
               unit="days"
-              trend="up"
+              trend={100}
+              color="from-amber-500/20 to-yellow-500/20"
             />
           </div>
         )}
 
-        {/* Charts Section */}
+        {/* CHARTS SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Weight Trend */}
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="text-primary" />
-              Weight Trend
-            </h2>
-            {last30Days.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={last30Days}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="date" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #0ea5e9' }}
-                    labelStyle={{ color: '#fff' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    stroke="#0ea5e9"
-                    strokeWidth={2}
-                    dot={{ fill: '#fbbf24', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-72 flex items-center justify-center text-slate-500">
-                No data yet. Start logging metrics!
+          <div className="group rounded-2xl overflow-hidden border border-slate-700 bg-dark-light/50 backdrop-blur hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-slate-700 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-primary/20 rounded-lg">
+                    <TrendingUp className="text-primary" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Weight Progress</h3>
+                    <p className="text-sm text-slate-400">Last 30 days trend</p>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+            <div className="p-6">
+              {last30Days.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={last30Days}>
+                    <defs>
+                      <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                    <XAxis dataKey="date" stroke="#94a3b8" />
+                    <YAxis stroke="#94a3b8" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1e293b', border: '2px solid #0ea5e9', borderRadius: '10px' }}
+                      labelStyle={{ color: '#fff' }}
+                    />
+                    <Area type="monotone" dataKey="weight" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorWeight)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-72 flex items-center justify-center text-slate-500">
+                  <div className="text-center">
+                    <Scale className="mx-auto mb-3 opacity-50" size={48} />
+                    <p>Start logging weight data</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Calorie Distribution */}
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Zap className="text-warning" />
-              Macro Balance
-            </h2>
-            {macroData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={macroData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value.toFixed(0)}g`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {macroData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #0ea5e9' }}
-                    labelStyle={{ color: '#fff' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-72 flex items-center justify-center text-slate-500">
-                No data yet
+          {/* Calorie Intake */}
+          <div className="group rounded-2xl overflow-hidden border border-slate-700 bg-dark-light/50 backdrop-blur hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+            <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-b border-slate-700 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-orange-500/20 rounded-lg">
+                    <Flame className="text-orange-500" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Calorie Intake</h3>
+                    <p className="text-sm text-slate-400">Daily consumption</p>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+            <div className="p-6">
+              {last30Days.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={last30Days}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                    <XAxis dataKey="date" stroke="#94a3b8" />
+                    <YAxis stroke="#94a3b8" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1e293b', border: '2px solid #f59e0b', borderRadius: '10px' }}
+                      labelStyle={{ color: '#fff' }}
+                    />
+                    <Bar dataKey="calories" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-72 flex items-center justify-center text-slate-500">
+                  <div className="text-center">
+                    <Flame className="mx-auto mb-3 opacity-50" size={48} />
+                    <p>Start logging calories</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Workout Activity */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Activity className="text-primary" />
-            Workout Activity (Last 30 Days)
-          </h2>
-          {last30Days.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={last30Days}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="date" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #0ea5e9' }}
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Bar dataKey="exerciseMinutes" fill="#06b6d4" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-72 flex items-center justify-center text-slate-500">
-              No workout data yet
+        {/* WORKOUT & MACRO SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Workout Activity */}
+          <div className="group rounded-2xl overflow-hidden border border-slate-700 bg-dark-light/50 backdrop-blur hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+            <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b border-slate-700 p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-cyan-500/20 rounded-lg">
+                  <Dumbbell className="text-cyan-500" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Workout Activity</h3>
+                  <p className="text-sm text-slate-400">Minutes per session</p>
+                </div>
+              </div>
             </div>
-          )}
+            <div className="p-6">
+              {last30Days.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={last30Days}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                    <XAxis dataKey="date" stroke="#94a3b8" />
+                    <YAxis stroke="#94a3b8" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1e293b', border: '2px solid #06b6d4', borderRadius: '10px' }}
+                      labelStyle={{ color: '#fff' }}
+                    />
+                    <Bar dataKey="exerciseMinutes" fill="#06b6d4" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-72 flex items-center justify-center text-slate-500">
+                  <div className="text-center">
+                    <Activity className="mx-auto mb-3 opacity-50" size={48} />
+                    <p>Log your first workout</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Macro Distribution */}
+          <div className="group rounded-2xl overflow-hidden border border-slate-700 bg-dark-light/50 backdrop-blur hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+            <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-b border-slate-700 p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-green-500/20 rounded-lg">
+                  <Gauge className="text-green-500" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Macro Balance</h3>
+                  <p className="text-sm text-slate-400">Nutritional distribution</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 flex items-center justify-center">
+              {stats && (stats.averageProtein > 0) ? (
+                <div>
+                  <ResponsiveContainer width={280} height={280}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Protein', value: stats.averageProtein },
+                          { name: 'Carbs', value: stats.averageProtein * 2 },
+                          { name: 'Fats', value: stats.averageProtein * 0.8 },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        <Cell fill="#10b981" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#ef4444" />
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#1e293b', border: '2px solid #0ea5e9', borderRadius: '10px' }}
+                        labelStyle={{ color: '#fff' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-6 mt-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span>Protein</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                      <span>Carbs</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span>Fats</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-slate-500">
+                  <Gauge className="mx-auto mb-3 opacity-50" size={48} />
+                  <p>Log metrics to see macro breakdown</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Recent Insights */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Analytics.generateInsights().slice(0, 2).map(insight => (
-            <div key={insight.id} className="card border-l-4 border-l-primary">
-              <h3 className="font-semibold text-lg mb-2">{insight.title}</h3>
-              <p className="text-slate-400 text-sm">{insight.description}</p>
-              <span className="inline-block mt-3 px-2 py-1 bg-primary/10 text-primary text-xs rounded">
-                {insight.type.toUpperCase()}
-              </span>
-            </div>
-          ))}
+        {/* INSIGHTS SECTION */}
+        <div className="rounded-2xl overflow-hidden border border-slate-700 bg-dark-light/50 backdrop-blur shadow-lg">
+          <div className="bg-gradient-to-r from-secondary/10 to-accent/10 border-b border-slate-700 p-6">
+            <h3 className="text-2xl font-bold flex items-center gap-3">
+              <Heart className="text-secondary" size={28} />
+              AI Insights
+            </h3>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Analytics.generateInsights().slice(0, 2).map(insight => (
+              <div
+                key={insight.id}
+                className="p-5 rounded-xl border-l-4 border-l-secondary bg-gradient-to-br from-secondary/10 to-transparent hover:shadow-lg hover:shadow-secondary/20 transition-all duration-300"
+              >
+                <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                  {insight.type === 'achievement' && '🎯'}
+                  {insight.type === 'suggestion' && '💡'}
+                  {insight.type === 'trend' && '📈'}
+                  {insight.type === 'warning' && '⚠️'}
+                  {insight.title}
+                </h4>
+                <p className="text-slate-300 text-sm mb-3">{insight.description}</p>
+                <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary text-xs font-semibold rounded-lg uppercase">
+                  {insight.type}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -229,15 +360,28 @@ export default function Dashboard() {
   )
 }
 
-function StatCard({ icon, label, value, unit, trend }: any) {
+function PremiumStatCard({ icon, label, value, unit, trend, color }: any) {
   return (
-    <div className="stat-box animate-slide-up">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-slate-400 text-sm font-medium">{label}</span>
-        {icon}
+    <div className={`group relative rounded-2xl overflow-hidden border border-slate-700 bg-gradient-to-br ${color} backdrop-blur p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-105`}>
+      <div className="absolute inset-0 bg-grid-pattern opacity-0 group-hover:opacity-5 transition-opacity"></div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="p-3 bg-white/10 rounded-lg group-hover:scale-110 transition-transform">
+            {icon}
+          </div>
+          {trend > 0 && (
+            <div className="flex items-center gap-1 text-green-400 text-sm font-bold">
+              <ArrowUp size={16} />
+              {trend}%
+            </div>
+          )}
+        </div>
+        
+        <p className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">{label}</p>
+        <p className="text-4xl font-black mb-1">{value.toLocaleString()}</p>
+        <p className="text-slate-500 text-sm">{unit}</p>
       </div>
-      <div className="text-3xl font-bold text-white">{value}</div>
-      <div className="text-xs text-slate-500 mt-2">{unit}</div>
     </div>
   )
 }
@@ -267,68 +411,91 @@ function MetricsModal({ onClose, onSave, currentCycle }: any) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-light border border-slate-700 rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto animate-slide-up">
-        <h2 className="text-2xl font-bold mb-6">Log Today's Metrics</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-dark-light to-dark border border-primary/30 rounded-2xl p-8 max-w-2xl w-full max-h-screen overflow-y-auto animate-slide-up shadow-2xl shadow-primary/20">
+        <h2 className="text-3xl font-black mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          📊 Log Your Metrics
+        </h2>
         
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <input
-            type="number"
-            placeholder="Weight (lbs)"
-            className="input-field"
-            onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Calories"
-            className="input-field"
-            value={formData.calories}
-            onChange={(e) => setFormData({ ...formData, calories: parseFloat(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Protein (g)"
-            className="input-field"
-            value={formData.protein}
-            onChange={(e) => setFormData({ ...formData, protein: parseFloat(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Exercise Minutes"
-            className="input-field"
-            onChange={(e) => setFormData({ ...formData, exerciseMinutes: parseFloat(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Sleep Hours"
-            className="input-field"
-            value={formData.sleepHours}
-            onChange={(e) => setFormData({ ...formData, sleepHours: parseFloat(e.target.value) })}
-          />
-          <select className="input-field" onChange={(e) => setFormData({ ...formData, mood: e.target.value as any })}>
-            <option value="excellent">Excellent</option>
-            <option value="good" selected>Good</option>
-            <option value="okay">Okay</option>
-            <option value="poor">Poor</option>
-          </select>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Weight (lbs)</label>
+            <input
+              type="number"
+              placeholder="0"
+              className="input-field w-full"
+              onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Calories</label>
+            <input
+              type="number"
+              placeholder="2500"
+              className="input-field w-full"
+              value={formData.calories}
+              onChange={(e) => setFormData({ ...formData, calories: parseFloat(e.target.value) })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Protein (g)</label>
+            <input
+              type="number"
+              placeholder="150"
+              className="input-field w-full"
+              value={formData.protein}
+              onChange={(e) => setFormData({ ...formData, protein: parseFloat(e.target.value) })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Exercise (min)</label>
+            <input
+              type="number"
+              placeholder="0"
+              className="input-field w-full"
+              onChange={(e) => setFormData({ ...formData, exerciseMinutes: parseFloat(e.target.value) })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Sleep Hours</label>
+            <input
+              type="number"
+              placeholder="8"
+              className="input-field w-full"
+              value={formData.sleepHours}
+              onChange={(e) => setFormData({ ...formData, sleepHours: parseFloat(e.target.value) })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">Mood</label>
+            <select className="input-field w-full" onChange={(e) => setFormData({ ...formData, mood: e.target.value as any })}>
+              <option value="excellent">Excellent 😄</option>
+              <option value="good" selected>Good 😊</option>
+              <option value="okay">Okay 😐</option>
+              <option value="poor">Poor 😞</option>
+            </select>
+          </div>
         </div>
 
         <textarea
-          placeholder="Notes..."
+          placeholder="Notes about your day..."
           className="input-field w-full mb-6"
           rows={3}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
         />
 
         <div className="flex gap-3">
-          <button className="btn-primary flex-1" onClick={handleSubmit}>
-            Save Metrics
+          <button className="btn-primary flex-1 text-lg py-3 rounded-xl font-bold" onClick={handleSubmit}>
+            💾 Save Metrics
           </button>
-          <button className="btn-secondary flex-1" onClick={onClose}>
-            Cancel
+          <button className="btn-secondary flex-1 text-lg py-3 rounded-xl font-bold" onClick={onClose}>
+            ❌ Cancel
           </button>
         </div>
       </div>
     </div>
   )
 }
+
+// Import missing icon
+import { Scale } from 'lucide-react'
